@@ -3,7 +3,6 @@
 import { useMemo, useRef } from "react"
 import { Line, Sparkles } from "@react-three/drei"
 import { Canvas, useFrame } from "@react-three/fiber"
-import type { Group, Mesh, PointLight } from "three"
 
 import {
   SCENE_COLORS,
@@ -13,6 +12,28 @@ import {
 } from "./life-scene-config"
 
 type VectorTuple = [number, number, number]
+
+type PositionTarget = {
+  position: {
+    set: (x: number, y: number, z: number) => void
+  }
+}
+
+type BreathingTarget = {
+  scale: {
+    setScalar: (scale: number) => void
+  }
+}
+
+type RotatingTarget = {
+  rotation: {
+    y: number
+  }
+}
+
+type IntensityTarget = {
+  intensity: number
+}
 
 function BodyPart({
   kind,
@@ -103,7 +124,7 @@ function Orbit({
   speed: number
   offset: number
 }) {
-  const node = useRef<Mesh>(null)
+  const node = useRef<PositionTarget>(null)
   const points = useMemo(() => orbitPoints(radius), [radius])
 
   useFrame(({ clock }) => {
@@ -135,9 +156,9 @@ function Orbit({
 }
 
 function IdentitySystem() {
-  const root = useRef<Group>(null)
-  const orbital = useRef<Group>(null)
-  const insight = useRef<PointLight>(null)
+  const root = useRef<BreathingTarget>(null)
+  const orbital = useRef<RotatingTarget>(null)
+  const insight = useRef<IntensityTarget>(null)
 
   useFrame(({ clock }) => {
     const time = clock.elapsedTime

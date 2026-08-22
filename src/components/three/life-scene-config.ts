@@ -1,5 +1,3 @@
-import { Vector3 } from "three"
-
 export const LIFE_PHASES = [
   "breathe",
   "understand",
@@ -9,6 +7,7 @@ export const LIFE_PHASES = [
 ] as const
 
 export type LifePhase = (typeof LIFE_PHASES)[number]
+export type OrbitPoint = [number, number, number]
 
 export const PHASE_DURATION_SECONDS = 6
 
@@ -38,10 +37,10 @@ export function orbitPoints(radius: number) {
   return Array.from({ length: 97 }, (_, index) => {
     const angle = (index / 96) * Math.PI * 2
 
-    return new Vector3(
+    return [
       Math.cos(angle) * radius,
       Math.sin(angle) * radius * 0.42,
       Math.sin(angle) * 0.28
-    )
+    ] satisfies OrbitPoint
   })
 }

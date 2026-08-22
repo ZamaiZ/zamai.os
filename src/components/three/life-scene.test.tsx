@@ -13,7 +13,7 @@ vi.mock("@react-three/drei", () => ({
   Sparkles: () => null,
 }))
 
-import { LIFE_PHASES, phaseAtElapsed } from "./life-scene-config"
+import { LIFE_PHASES, orbitPoints, phaseAtElapsed } from "./life-scene-config"
 import { LifeScene } from "./life-scene"
 
 describe("life scene cycle", () => {
@@ -31,6 +31,14 @@ describe("life scene cycle", () => {
     expect(phaseAtElapsed(18)).toBe("sharpen")
     expect(phaseAtElapsed(24)).toBe("integrate")
     expect(phaseAtElapsed(30)).toBe("breathe")
+  })
+
+  it("represents orbit points as serializable coordinate tuples", () => {
+    const points = orbitPoints(2)
+
+    expect(points).toHaveLength(97)
+    expect(points[0]).toEqual([2, 0, 0])
+    expect(points[0]).toBeInstanceOf(Array)
   })
 
   it("renders a decorative canvas hidden from assistive technology", () => {

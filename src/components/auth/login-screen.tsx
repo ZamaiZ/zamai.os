@@ -22,7 +22,17 @@ const reveal = {
   visible: { opacity: 1, y: 0 },
 }
 
-export function LoginScreen(): React.JSX.Element {
+const emailErrorId = "login-email-error"
+const passwordErrorId = "login-password-error"
+const onValidSubmitNoop = () => undefined
+
+type LoginScreenProps = {
+  onValidSubmit?: () => void
+}
+
+export function LoginScreen({
+  onValidSubmit = onValidSubmitNoop,
+}: LoginScreenProps): React.JSX.Element {
   const [showPassword, setShowPassword] = useState(false)
   const reduceMotion = useReducedMotion()
   const {
@@ -78,7 +88,7 @@ export function LoginScreen(): React.JSX.Element {
             className="mt-10 space-y-5"
             noValidate
             aria-label="Entrar no Life"
-            onSubmit={handleSubmit(() => undefined)}
+            onSubmit={handleSubmit(onValidSubmit)}
           >
             <Field data-invalid={Boolean(errors.email)}>
               <FieldLabel htmlFor="login-email">E-mail</FieldLabel>
@@ -90,9 +100,12 @@ export function LoginScreen(): React.JSX.Element {
                   placeholder="voce@exemplo.com"
                   className="h-11"
                   aria-invalid={Boolean(errors.email)}
+                  aria-describedby={errors.email ? emailErrorId : undefined}
                   {...register("email")}
                 />
-                <FieldError>{errors.email?.message}</FieldError>
+                <FieldError id={emailErrorId}>
+                  {errors.email?.message}
+                </FieldError>
               </FieldContent>
             </Field>
 
@@ -106,6 +119,9 @@ export function LoginScreen(): React.JSX.Element {
                     autoComplete="current-password"
                     className="h-11 pe-12"
                     aria-invalid={Boolean(errors.password)}
+                    aria-describedby={
+                      errors.password ? passwordErrorId : undefined
+                    }
                     {...register("password")}
                   />
                   <Button
@@ -123,7 +139,9 @@ export function LoginScreen(): React.JSX.Element {
                     )}
                   </Button>
                 </div>
-                <FieldError>{errors.password?.message}</FieldError>
+                <FieldError id={passwordErrorId}>
+                  {errors.password?.message}
+                </FieldError>
               </FieldContent>
             </Field>
 

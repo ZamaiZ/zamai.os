@@ -26,13 +26,21 @@ describe("LoginScreen", () => {
   it("shows field-level errors for an invalid submission", async () => {
     render(<LoginScreen />)
 
-    fireEvent.change(screen.getByLabelText("E-mail"), {
+    const email = screen.getByLabelText("E-mail")
+    const password = screen.getByLabelText("Senha")
+    fireEvent.change(email, {
       target: { value: "eduardo" },
     })
     fireEvent.click(screen.getByRole("button", { name: "Entrar" }))
 
-    expect(await screen.findByText("Digite um e-mail válido.")).toBeVisible()
-    expect(screen.getByText("Digite sua senha.")).toBeVisible()
+    const emailError = await screen.findByText("Digite um e-mail válido.")
+    const passwordError = screen.getByText("Digite sua senha.")
+    expect(emailError).toBeVisible()
+    expect(passwordError).toBeVisible()
+    expect(emailError).toHaveAttribute("id", "login-email-error")
+    expect(passwordError).toHaveAttribute("id", "login-password-error")
+    expect(email).toHaveAttribute("aria-describedby", "login-email-error")
+    expect(password).toHaveAttribute("aria-describedby", "login-password-error")
   })
 
   it("toggles password visibility with an accessible control", () => {
@@ -49,11 +57,12 @@ describe("LoginScreen", () => {
 
   it("keeps a valid submission local and on the same document", async () => {
     const fetchSpy = vi.fn()
+    const onValidSubmit = vi.fn()
     vi.stubGlobal("fetch", fetchSpy)
     const pushState = vi.spyOn(window.history, "pushState")
     const storage = vi.spyOn(Storage.prototype, "setItem")
 
-    render(<LoginScreen />)
+    render(<LoginScreen onValidSubmit={onValidSubmit} />)
     fireEvent.change(screen.getByLabelText("E-mail"), {
       target: { value: "eduardo@example.com" },
     })
@@ -62,9 +71,8 @@ describe("LoginScreen", () => {
     })
     fireEvent.submit(screen.getByRole("form", { name: "Entrar no Life" }))
 
-    await waitFor(() =>
-      expect(screen.queryByRole("alert")).not.toBeInTheDocument()
-    )
+    await waitFor(() => expect(onValidSubmit).toHaveBeenCalledTimes(1))
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument()
     expect(pushState).not.toHaveBeenCalled()
     expect(storage).not.toHaveBeenCalled()
     expect(fetchSpy).not.toHaveBeenCalled()

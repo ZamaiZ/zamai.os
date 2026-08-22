@@ -1,10 +1,10 @@
-import { act, render, screen } from "@testing-library/react"
-import { createElement } from "react"
-import { afterEach, describe, expect, it, vi } from "vitest"
+import { render, screen } from "@testing-library/react"
+import { describe, expect, it, vi } from "vitest"
 
 vi.mock("@react-three/fiber", () => ({
-  Canvas: () =>
-    createElement("div", { "data-testid": "life-canvas", "aria-hidden": true }),
+  Canvas: ({ "aria-hidden": ariaHidden }: { "aria-hidden"?: boolean }) => (
+    <div data-testid="life-canvas" aria-hidden={ariaHidden} />
+  ),
   useFrame: vi.fn(),
 }))
 
@@ -17,8 +17,6 @@ import { LIFE_PHASES, phaseAtElapsed } from "./life-scene-config"
 import { LifeScene } from "./life-scene"
 
 describe("life scene cycle", () => {
-  afterEach(() => vi.useRealTimers())
-
   it("loops through the five conceptual phases", () => {
     expect(LIFE_PHASES).toEqual([
       "breathe",
@@ -35,15 +33,13 @@ describe("life scene cycle", () => {
     expect(phaseAtElapsed(30)).toBe("breathe")
   })
 
-  it("renders a decorative canvas and advances the visible phase label", () => {
-    vi.useFakeTimers()
-    render(createElement(LifeScene))
+  it("renders a decorative canvas hidden from assistive technology", () => {
+    render(<LifeScene />)
 
-    expect(screen.getByTestId("life-canvas")).toBeInTheDocument()
-    expect(screen.getByText("breathe")).toBeInTheDocument()
-
-    act(() => vi.advanceTimersByTime(6000))
-
-    expect(screen.getByText("understand")).toBeInTheDocument()
+    expect(screen.getByTestId("life-canvas")).toHaveAttribute(
+      "aria-hidden",
+      "true"
+    )
+    expect(screen.queryByText("breathe")).not.toBeInTheDocument()
   })
 })

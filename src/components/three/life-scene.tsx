@@ -1,13 +1,11 @@
 "use client"
 
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useMemo, useRef } from "react"
 import { Line, Sparkles } from "@react-three/drei"
 import { Canvas, useFrame } from "@react-three/fiber"
 import type { Group, Mesh, PointLight } from "three"
 
 import {
-  LIFE_PHASES,
-  PHASE_DURATION_SECONDS,
   SCENE_COLORS,
   orbitPoints,
   phaseAtElapsed,
@@ -223,17 +221,6 @@ function SceneContent() {
 }
 
 export function LifeScene() {
-  const [phaseIndex, setPhaseIndex] = useState(0)
-
-  useEffect(() => {
-    const timer = window.setInterval(
-      () => setPhaseIndex((index) => (index + 1) % LIFE_PHASES.length),
-      PHASE_DURATION_SECONDS * 1000
-    )
-
-    return () => window.clearInterval(timer)
-  }, [])
-
   return (
     <div className="relative h-full min-h-64 w-full bg-[var(--life-space)]">
       <Canvas
@@ -248,9 +235,6 @@ export function LifeScene() {
       >
         <SceneContent />
       </Canvas>
-      <div className="absolute right-8 bottom-8 font-mono text-[10px] tracking-[0.18em] text-[var(--life-flow)] uppercase">
-        {LIFE_PHASES[phaseIndex]}
-      </div>
       <p className="sr-only">
         Um corpo humano abstrato respira enquanto compreender, alinhar,
         refinar e integrar formam um ciclo contínuo.

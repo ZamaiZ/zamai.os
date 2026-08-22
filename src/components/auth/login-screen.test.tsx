@@ -5,6 +5,15 @@ vi.mock("@/components/three/life-scene-loader", () => ({
   LifeSceneLoader: () => <div data-testid="scene-boundary" />,
 }))
 
+vi.mock("motion/react", async (importOriginal) => {
+  const motion = await importOriginal<typeof import("motion/react")>()
+
+  return {
+    ...motion,
+    useReducedMotion: () => true,
+  }
+})
+
 import { LoginScreen } from "./login-screen"
 
 describe("LoginScreen", () => {

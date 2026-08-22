@@ -57,21 +57,29 @@ describe("LoginScreen", () => {
 
   it("keeps a valid submission local and on the same document", async () => {
     const fetchSpy = vi.fn()
-    const onValidSubmit = vi.fn()
     vi.stubGlobal("fetch", fetchSpy)
     const pushState = vi.spyOn(window.history, "pushState")
     const storage = vi.spyOn(Storage.prototype, "setItem")
 
-    render(<LoginScreen onValidSubmit={onValidSubmit} />)
+    render(<LoginScreen />)
+    const form = screen.getByRole("form", { name: "Entrar no Life" })
+
+    fireEvent.submit(form)
+    expect(await screen.findByText("Digite um e-mail válido.")).toBeVisible()
+    expect(screen.getByText("Digite sua senha.")).toBeVisible()
+
     fireEvent.change(screen.getByLabelText("E-mail"), {
       target: { value: "eduardo@example.com" },
     })
     fireEvent.change(screen.getByLabelText("Senha"), {
       target: { value: "segredo" },
     })
-    fireEvent.submit(screen.getByRole("form", { name: "Entrar no Life" }))
+    fireEvent.submit(form)
 
-    await waitFor(() => expect(onValidSubmit).toHaveBeenCalledTimes(1))
+    await waitFor(() => {
+      expect(screen.queryByText("Digite um e-mail válido.")).not.toBeInTheDocument()
+      expect(screen.queryByText("Digite sua senha.")).not.toBeInTheDocument()
+    })
     expect(screen.queryByRole("alert")).not.toBeInTheDocument()
     expect(pushState).not.toHaveBeenCalled()
     expect(storage).not.toHaveBeenCalled()

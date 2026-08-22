@@ -24,15 +24,8 @@ const reveal = {
 
 const emailErrorId = "login-email-error"
 const passwordErrorId = "login-password-error"
-const onValidSubmitNoop = () => undefined
 
-type LoginScreenProps = {
-  onValidSubmit?: () => void
-}
-
-export function LoginScreen({
-  onValidSubmit = onValidSubmitNoop,
-}: LoginScreenProps): React.JSX.Element {
+export function LoginScreen(): React.JSX.Element {
   const [showPassword, setShowPassword] = useState(false)
   const reduceMotion = useReducedMotion()
   const {
@@ -88,7 +81,7 @@ export function LoginScreen({
             className="mt-10 space-y-5"
             noValidate
             aria-label="Entrar no Life"
-            onSubmit={handleSubmit(onValidSubmit)}
+            onSubmit={handleSubmit(() => undefined)}
           >
             <Field data-invalid={Boolean(errors.email)}>
               <FieldLabel htmlFor="login-email">E-mail</FieldLabel>

@@ -76,7 +76,6 @@ export function LifeScenePoster({ className }: { className?: string }) {
           <circle cx="505" cy="319" r="4" />
           <circle cx="432" cy="610" r="4" />
         </g>
-        <circle cx="536" cy="472" r="4" fill="var(--life-insight)" />
       </svg>
       <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[var(--life-space)] to-transparent" />
     </div>

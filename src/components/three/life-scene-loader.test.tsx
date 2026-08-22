@@ -12,6 +12,7 @@ vi.mock("next/dynamic", () => ({
 }))
 
 import { LifeSceneLoader } from "./life-scene-loader"
+import { LifeScenePoster } from "./life-scene-poster"
 
 function setMedia({ mobile = false, reduced = false } = {}) {
   vi.stubGlobal(
@@ -41,6 +42,12 @@ describe("LifeSceneLoader", () => {
   afterEach(() => {
     vi.restoreAllMocks()
     vi.unstubAllGlobals()
+  })
+
+  it("keeps Yellow out of the static poster fallback", () => {
+    const { container } = render(<LifeScenePoster />)
+
+    expect(container.innerHTML).not.toContain("--life-insight")
   })
 
   it("shows the poster when reduced motion is enabled", () => {

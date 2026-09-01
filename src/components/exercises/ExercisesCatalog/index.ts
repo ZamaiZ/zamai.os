@@ -1,0 +1,1 @@
+export { ExercisesCatalog } from "./exercisesCatalog"

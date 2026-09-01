@@ -1,0 +1,15 @@
+export const loginCopy = {
+  title: "Bem-vindo de volta.",
+  description: "Entre com suas credenciais para acessar seu espaço pessoal.",
+  formAriaLabel: "Entrar no Zamai.OS",
+  emailLabel: "E-mail",
+  emailPlaceholder: "voce@exemplo.com",
+  passwordLabel: "Senha",
+  showPassword: "Mostrar senha",
+  hidePassword: "Ocultar senha",
+  submit: "Entrar",
+  submitting: "Entrando…",
+  signUpPrompt: "Primeiro acesso?",
+  signUpLink: "Criar conta",
+  privateAccess: "Acesso pessoal e privado.",
+} as const

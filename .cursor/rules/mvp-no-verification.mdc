@@ -1,0 +1,15 @@
+---
+description: Keep MVP work implementation-first and avoid automated verification overhead
+alwaysApply: true
+---
+
+# MVP Implementation Mode
+
+- Implement the requested behavior directly with the smallest coherent change.
+- Do not create or run automated tests unless the user explicitly requests tests in the current message.
+- Do not run lint, typecheck, exec tsc, build, formatting, audit, or verification commands unless explicitly requested.
+- Do not run Git status, diff, branch, worktree, add, commit, push, or other Git commands unless explicitly requested.
+- Do not create worktrees or pause implementation to propose isolation.
+- Keep terminal inspection to the minimum required to locate or understand a file.
+- Use user-provided runtime errors as the primary feedback loop for this MVP.
+- Preserve unrelated files and avoid compliance-oriented additions that do not make the requested feature work.

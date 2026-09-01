@@ -1,0 +1,1 @@
+export { ClientsCatalogSkeleton } from "./clientsCatalogSkeleton"

@@ -11,6 +11,9 @@
 # testing
 /coverage
 
+# visual brainstorming sessions
+/.superpowers/
+
 # next.js
 /.next/
 /out/
@@ -30,7 +33,16 @@ pnpm-debug.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
+
+# exercise dataset cache (seed script)
+/data/exercises/.cache/
+
+# pnpm local content-addressable cache
+/.pnpm-store/
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+certificates

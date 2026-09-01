@@ -1,6 +1,7 @@
 import "server-only"
 
 import { getGoogleMapsApiKey } from "@/lib/google/mapsConfig"
+import { isPlaceTableAType } from "@/lib/prospects/segments"
 
 export class CityNotFoundError extends Error {
   constructor() {
@@ -10,9 +11,12 @@ export class CityNotFoundError extends Error {
 }
 
 export class GooglePlacesError extends Error {
-  constructor(message = "Google Places request failed") {
+  readonly googleStatus?: string
+
+  constructor(message = "Google Places request failed", googleStatus?: string) {
     super(message)
     this.name = "GooglePlacesError"
+    this.googleStatus = googleStatus
   }
 }
 
@@ -41,6 +45,7 @@ export type GooglePlaceResult = {
 
 type GeocodeResponse = {
   status: string
+  error_message?: string
   results?: Array<{
     formatted_address?: string
     geometry?: {
@@ -131,16 +136,36 @@ export async function geocodeCity(cityQuery: string): Promise<GeocodedCity> {
   url.searchParams.set("key", apiKey)
 
   const response = await fetch(url)
+  const payload = (await response.json().catch(() => null)) as
+    | GeocodeResponse
+    | null
+
   if (!response.ok) {
+    const message = payload?.error_message ?? "Unable to geocode city"
+    console.error("Geocoding HTTP error", {
+      httpStatus: response.status,
+      googleStatus: payload?.status,
+      message,
+    })
+    throw new GooglePlacesError(message, payload?.status)
+  }
+
+  if (!payload) {
     throw new GooglePlacesError("Unable to geocode city")
   }
 
-  const payload = (await response.json()) as GeocodeResponse
+  if (payload.status !== "OK" && payload.status !== "ZERO_RESULTS") {
+    const message =
+      payload.error_message ?? `Geocoding failed: ${payload.status}`
+    console.error("Geocoding API error", {
+      googleStatus: payload.status,
+      message,
+    })
+    throw new GooglePlacesError(message, payload.status)
+  }
+
   if (payload.status === "ZERO_RESULTS" || !payload.results?.length) {
     throw new CityNotFoundError()
-  }
-  if (payload.status !== "OK") {
-    throw new GooglePlacesError("Unable to geocode city")
   }
 
   const result = payload.results[0]
@@ -182,9 +207,14 @@ async function searchTextPage(body: Record<string, unknown>) {
     | null
 
   if (!response.ok || payload?.error) {
-    throw new GooglePlacesError(
-      payload?.error?.message ?? "Google Places request failed"
-    )
+    const googleStatus = payload?.error?.status
+    const message = payload?.error?.message ?? "Google Places request failed"
+    console.error("Places API error", {
+      httpStatus: response.status,
+      googleStatus,
+      message,
+    })
+    throw new GooglePlacesError(message, googleStatus)
   }
 
   return payload ?? {}
@@ -195,6 +225,13 @@ export async function searchPlacesByCity(input: {
   includedType: string
   viewport: GeocodedCity["viewport"]
 }): Promise<GooglePlaceResult[]> {
+  if (!isPlaceTableAType(input.includedType)) {
+    throw new GooglePlacesError(
+      `Invalid includedType: ${input.includedType}`,
+      "INVALID_ARGUMENT"
+    )
+  }
+
   const places: GooglePlaceResult[] = []
   let pageToken: string | undefined
 

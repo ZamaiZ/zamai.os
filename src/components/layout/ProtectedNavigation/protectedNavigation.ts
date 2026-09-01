@@ -1,4 +1,9 @@
-import { HomeIcon, HeartPulseIcon, PeopleIcon } from "@/components/icons"
+import {
+  HomeIcon,
+  HeartPulseIcon,
+  PeopleIcon,
+  WeightIcon,
+} from "@/components/icons"
 
 import type { ProtectedNavigationItem } from "./types"
 
@@ -13,6 +18,12 @@ export const protectedNavigation = [
     label: "Exercícios",
     href: "/lifestyle/workouts/exercises",
     icon: HeartPulseIcon,
+    subtitle: "Lifestyle · Treinos",
+  },
+  {
+    label: "Treinos",
+    href: "/lifestyle/workouts/plans",
+    icon: WeightIcon,
     subtitle: "Lifestyle · Treinos",
   },
 ] as const satisfies readonly ProtectedNavigationItem[]

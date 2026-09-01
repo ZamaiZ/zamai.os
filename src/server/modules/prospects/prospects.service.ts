@@ -2,7 +2,7 @@ import "server-only"
 
 import { createAdminClient } from "@/lib/supabase/admin"
 import { checkRateLimit } from "@/lib/rateLimit"
-import { getProspectSegmentLabel } from "@/lib/prospects/segments"
+import { getProspectSegment } from "@/lib/prospects/segments"
 import { classifyWebsiteUri } from "@/lib/prospects/websiteKind"
 import type { Json } from "@/lib/supabase/database.types"
 import type { ProspectStatus } from "@/lib/prospects/status"
@@ -151,7 +151,7 @@ export class ProspectService {
 
   static async searchProspects(input: {
     cityQuery: string
-    includedType: string
+    segmentId: string
     userId: string
   }): Promise<ProspectSearchDto> {
     const allowed = await checkRateLimit("prospects-search", input.userId)
@@ -159,11 +159,15 @@ export class ProspectService {
       throw new ProspectRateLimitedError()
     }
 
+    const segment = getProspectSegment(input.segmentId)
+    if (!segment) {
+      throw new GooglePlacesError("Invalid prospect segment", "INVALID_ARGUMENT")
+    }
+
     const geocoded = await geocodeCity(input.cityQuery)
-    const segmentLabel = getProspectSegmentLabel(input.includedType)
     const places = await searchPlacesByCity({
-      textQuery: `${segmentLabel} em ${input.cityQuery}`,
-      includedType: input.includedType,
+      textQuery: `${segment.label} em ${input.cityQuery}`,
+      includedType: segment.includedType,
       viewport: geocoded.viewport,
     })
 
@@ -239,7 +243,7 @@ export class ProspectService {
       .insert({
         city_query: input.cityQuery,
         geocoded_label: geocoded.label,
-        included_type: input.includedType,
+        included_type: segment.includedType,
         viewport: geocoded.viewport as unknown as Json,
         google_result_count: places.length,
         matched_count: matchedCount,

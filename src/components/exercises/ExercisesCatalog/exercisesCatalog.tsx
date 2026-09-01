@@ -7,6 +7,7 @@ import { CatalogEmptyState } from "@/components/exercises/CatalogEmptyState"
 import { ExerciseCard } from "@/components/exercises/ExerciseCard"
 import { ExercisesDataTable } from "@/components/exercises/ExercisesDataTable"
 import { ExercisesToolbar } from "@/components/exercises/ExercisesToolbar"
+import { ExerciseCreationFlow } from "@/components/exercises/ExerciseCreationFlow"
 import { ExerciseFormDialog } from "@/components/exercises/ExerciseFormDialog"
 import { MuscleGroupCard } from "@/components/exercises/MuscleGroupCard"
 import { MuscleGroupFormDialog } from "@/components/exercises/MuscleGroupFormDialog"
@@ -346,17 +347,20 @@ export function ExercisesCatalog({
           if (!nextOpen) setEditingGroup(null)
         }}
       />
+      <ExerciseCreationFlow
+        open={creatingExercise}
+        onOpenChange={setCreatingExercise}
+        muscleGroups={muscleGroups}
+        equipmentOptions={exercises.map((exercise) => exercise.equipment)}
+        catalogExercises={exercises}
+      />
       <ExerciseFormDialog
-        mode={editingExercise ? "edit" : "create"}
-        open={creatingExercise || editingExercise !== null}
+        open={editingExercise !== null}
         exercise={editingExercise}
         muscleGroups={muscleGroups}
-        equipmentOptions={equipmentOptions}
+        equipmentOptions={exercises.map((exercise) => exercise.equipment)}
         onOpenChange={(nextOpen) => {
-          if (!nextOpen) {
-            setCreatingExercise(false)
-            setEditingExercise(null)
-          }
+          if (!nextOpen) setEditingExercise(null)
         }}
       />
     </>

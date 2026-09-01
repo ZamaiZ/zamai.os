@@ -2,16 +2,18 @@
 
 import * as React from "react"
 
+import { ExerciseCreationFlow } from "@/components/exercises/ExerciseCreationFlow"
+import { MuscleGroupFormDialog } from "@/components/exercises/MuscleGroupFormDialog"
+import { exercisesCatalogCopy } from "@/components/exercises/shared/constants"
+import type {
+  CatalogExercise,
+  CatalogMuscleGroup,
+} from "@/components/exercises/shared/types"
 import {
   ChevronDownIcon,
-  DownloadIcon,
   MuscularTorsoIcon,
   PlusIcon,
 } from "@/components/icons"
-import { ExerciseFormDialog } from "@/components/exercises/ExerciseFormDialog"
-import { MuscleGroupFormDialog } from "@/components/exercises/MuscleGroupFormDialog"
-import { exercisesCatalogCopy } from "@/components/exercises/shared/constants"
-import type { CatalogMuscleGroup } from "@/components/exercises/shared/types"
 import { Button } from "@/components/primitives/button"
 import { ButtonGroup } from "@/components/primitives/buttonGroup"
 import {
@@ -25,11 +27,13 @@ import {
 type ExercisesPageActionsProps = {
   muscleGroups: CatalogMuscleGroup[]
   equipmentOptions: Array<string | null | undefined>
+  catalogExercises?: CatalogExercise[]
 }
 
 export function ExercisesPageActions({
   muscleGroups,
   equipmentOptions,
+  catalogExercises = [],
 }: ExercisesPageActionsProps) {
   const [createGroupOpen, setCreateGroupOpen] = React.useState(false)
   const [createExerciseOpen, setCreateExerciseOpen] = React.useState(false)
@@ -66,10 +70,6 @@ export function ExercisesPageActions({
                 <MuscularTorsoIcon aria-hidden />
                 {exercisesCatalogCopy.newMuscleGroup}
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <DownloadIcon aria-hidden />
-                {exercisesCatalogCopy.importSpreadsheet}
-              </DropdownMenuItem>
             </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -80,12 +80,12 @@ export function ExercisesPageActions({
         open={createGroupOpen}
         onOpenChange={setCreateGroupOpen}
       />
-      <ExerciseFormDialog
-        mode="create"
+      <ExerciseCreationFlow
         open={createExerciseOpen}
         onOpenChange={setCreateExerciseOpen}
         muscleGroups={muscleGroups}
         equipmentOptions={equipmentOptions}
+        catalogExercises={catalogExercises}
       />
     </>
   )

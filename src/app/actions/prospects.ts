@@ -40,7 +40,7 @@ function mapSearchError(error: unknown): string {
     return "Cidade não encontrada. Inclua a UF, por exemplo: Joinville SC."
   }
   if (error instanceof GooglePlacesError) {
-    return "Não foi possível consultar o Google Maps agora."
+    return mapGooglePlacesError(error)
   }
   if (
     error instanceof Error &&
@@ -51,9 +51,26 @@ function mapSearchError(error: unknown): string {
   return "Não foi possível pesquisar empresas."
 }
 
+function mapGooglePlacesError(error: GooglePlacesError) {
+  if (
+    error.googleStatus === "PERMISSION_DENIED" ||
+    error.googleStatus === "REQUEST_DENIED"
+  ) {
+    return "Geocoding não basta: ative a Places API (New) no mesmo projeto da chave."
+  }
+  if (error.googleStatus === "INVALID_ARGUMENT") {
+    return "Segmento inválido para a Places API."
+  }
+  const detail = error.message.trim()
+  if (detail && detail !== "Google Places request failed") {
+    return `Não foi possível consultar o Google Maps agora. ${detail}`
+  }
+  return "Não foi possível consultar o Google Maps agora."
+}
+
 export async function searchProspectsAction(input: {
   cityQuery: string
-  includedType: string
+  segmentId: string
 }): Promise<ProspectSearchResult> {
   const user = await requireAuthenticatedUser()
   const parsed = searchProspectsSchema.safeParse(input)
@@ -64,7 +81,7 @@ export async function searchProspectsAction(input: {
   try {
     const search = await ProspectService.searchProspects({
       cityQuery: parsed.data.cityQuery,
-      includedType: parsed.data.includedType,
+      segmentId: parsed.data.segmentId,
       userId: user.id,
     })
     return { ok: true, search }

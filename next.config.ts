@@ -1,13 +1,16 @@
 import type { NextConfig } from "next"
 
-const tunnelOrigin = process.env.DEV_TUNNEL_ORIGIN?.trim()
+const ngrokDevOrigin = "marleen-interthronging-synergistically.ngrok-free.dev"
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ["isomorphic-dompurify", "jsdom"],
-  allowedDevOrigins: [
-    '*.loca.lt',
-    '192.168.x.x', // teu IP ethernet actual
-  ],
+  allowedDevOrigins: [ngrokDevOrigin],
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "2mb",
+      allowedOrigins: [ngrokDevOrigin],
+    },
+  },
   async headers() {
     return [
       {

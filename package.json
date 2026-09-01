@@ -5,7 +5,6 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbo",
-    "tunnel": "lt --port 3000 --subdomain zamaios",
     "push:keys": "pnpm exec web-push generate-vapid-keys",
     "seed:exercises": "node --env-file=.env scripts/seed-exercises.mjs",
     "seed:muscle-icons": "node --env-file=.env scripts/seed-muscle-group-icons.mjs",
@@ -31,6 +30,7 @@
     "motion": "^13.1.1",
     "next": "16.2.6",
     "next-themes": "^0.4.6",
+    "ngrok": "5.0.0-beta.2",
     "react": "19.2.4",
     "react-day-picker": "^10.0.1",
     "react-dom": "19.2.4",
@@ -56,7 +56,6 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
     "jsdom": "^30.0.1",
-    "localtunnel": "^2.0.2",
     "prettier": "^3.8.3",
     "prettier-plugin-tailwindcss": "^0.8.0",
     "svgo": "^4.0.2",

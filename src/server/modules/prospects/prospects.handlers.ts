@@ -28,7 +28,34 @@ function mapSearchError(error: unknown) {
     return json({ error: "City not found" }, { status: 400 })
   }
   if (error instanceof GooglePlacesError) {
-    return json({ error: "Google Places request failed" }, { status: 502 })
+    if (
+      error.googleStatus === "PERMISSION_DENIED" ||
+      error.googleStatus === "REQUEST_DENIED"
+    ) {
+      return json(
+        {
+          error:
+            "Geocoding não basta: ative a Places API (New) no mesmo projeto da chave.",
+        },
+        { status: 502 }
+      )
+    }
+    if (error.googleStatus === "INVALID_ARGUMENT") {
+      return json(
+        { error: "Segmento inválido para a Places API." },
+        { status: 400 }
+      )
+    }
+    const detail = error.message.trim()
+    return json(
+      {
+        error:
+          detail && detail !== "Google Places request failed"
+            ? `Não foi possível consultar o Google Maps agora. ${detail}`
+            : "Não foi possível consultar o Google Maps agora.",
+      },
+      { status: 502 }
+    )
   }
   throw error
 }
@@ -54,7 +81,7 @@ export const searchProspectsHandler: ApiHandler = async (ctx) => {
   try {
     const result = await ProspectService.searchProspects({
       cityQuery: body.cityQuery,
-      includedType: body.includedType,
+      segmentId: body.segmentId,
       userId: ctx.user!.id,
     })
     return json(result)

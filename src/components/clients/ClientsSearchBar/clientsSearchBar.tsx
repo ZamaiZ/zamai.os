@@ -72,16 +72,16 @@ export function ClientsSearchBar({
             <Label htmlFor="prospect-segment">
               {clientsCatalogCopy.segmentLabel}
             </Label>
-            <Combobox
+            <Combobox<ProspectSegment>
               autoHighlight
               items={[...PROSPECT_SEGMENTS]}
               value={segment}
               onValueChange={(next) =>
                 onSegmentChange((next as ProspectSegment | null) ?? null)
               }
-              isItemEqualToValue={(a, b) => a.type === b.type}
+              isItemEqualToValue={(a, b) => a.id === b.id}
               itemToStringLabel={(item) => item.label}
-              itemToStringValue={(item) => item.type}
+              itemToStringValue={(item) => item.id}
               disabled={searching}
             >
               <ComboboxInput
@@ -99,7 +99,7 @@ export function ClientsSearchBar({
                 <ComboboxEmpty>{clientsCatalogCopy.segmentEmpty}</ComboboxEmpty>
                 <ComboboxList>
                   {(item) => (
-                    <ComboboxItem key={item.type} value={item}>
+                    <ComboboxItem key={item.id} value={item}>
                       {item.label}
                     </ComboboxItem>
                   )}

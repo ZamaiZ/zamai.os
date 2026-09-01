@@ -196,6 +196,155 @@ export type Database = {
           },
         ]
       }
+      workouts: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      workout_exercises: {
+        Row: {
+          exercise_id: string
+          id: string
+          sort_order: number
+          workout_id: string
+        }
+        Insert: {
+          exercise_id: string
+          id?: string
+          sort_order: number
+          workout_id: string
+        }
+        Update: {
+          exercise_id?: string
+          id?: string
+          sort_order?: number
+          workout_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workout_exercises_exercise_id_fkey"
+            columns: ["exercise_id"]
+            isOneToOne: false
+            referencedRelation: "exercises"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workout_exercises_workout_id_fkey"
+            columns: ["workout_id"]
+            isOneToOne: false
+            referencedRelation: "workouts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workout_sessions: {
+        Row: {
+          avg_heart_rate: number | null
+          calories: number | null
+          exercises_snapshot: Json
+          finished_at: string | null
+          id: string
+          started_at: string
+          status: string
+          workout_id: string
+          workout_name: string
+        }
+        Insert: {
+          avg_heart_rate?: number | null
+          calories?: number | null
+          exercises_snapshot?: Json
+          finished_at?: string | null
+          id?: string
+          started_at?: string
+          status: string
+          workout_id: string
+          workout_name: string
+        }
+        Update: {
+          avg_heart_rate?: number | null
+          calories?: number | null
+          exercises_snapshot?: Json
+          finished_at?: string | null
+          id?: string
+          started_at?: string
+          status?: string
+          workout_id?: string
+          workout_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workout_sessions_workout_id_fkey"
+            columns: ["workout_id"]
+            isOneToOne: false
+            referencedRelation: "workouts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workout_session_sets: {
+        Row: {
+          exercise_id: string
+          exercise_index: number
+          id: string
+          reps: number | null
+          session_id: string
+          slot: number
+          status: string
+          weight_kg: number | null
+        }
+        Insert: {
+          exercise_id: string
+          exercise_index: number
+          id?: string
+          reps?: number | null
+          session_id: string
+          slot: number
+          status: string
+          weight_kg?: number | null
+        }
+        Update: {
+          exercise_id?: string
+          exercise_index?: number
+          id?: string
+          reps?: number | null
+          session_id?: string
+          slot?: number
+          status?: string
+          weight_kg?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workout_session_sets_exercise_id_fkey"
+            columns: ["exercise_id"]
+            isOneToOne: false
+            referencedRelation: "exercises"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workout_session_sets_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "workout_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           body: string

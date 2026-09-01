@@ -25,14 +25,12 @@ export default async function ExercisesPage() {
           <h1 className="mt-1.5 text-2xl font-semibold tracking-[-0.03em] text-balance">
             {exercisesCatalogCopy.title}
           </h1>
-          <p className="mt-1.5 max-w-xl text-sm leading-5 text-muted-foreground">
-            {exercisesCatalogCopy.description}
-          </p>
         </div>
 
         <ExercisesPageActions
           muscleGroups={muscleGroups}
           equipmentOptions={exercises.map((exercise) => exercise.equipment)}
+          catalogExercises={exercises}
         />
       </section>
 

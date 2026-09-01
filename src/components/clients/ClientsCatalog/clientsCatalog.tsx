@@ -73,7 +73,7 @@ export function ClientsCatalog({
     startSearch(async () => {
       const result = await searchProspectsAction({
         cityQuery,
-        includedType: segment.type,
+        segmentId: segment.id,
       })
       if (!result.ok) {
         toast.add({ type: "error", title: result.error })

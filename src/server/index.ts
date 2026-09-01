@@ -7,6 +7,7 @@ import { registerHealthRoutes } from "@/server/modules/health"
 import { registerNotificationRoutes } from "@/server/modules/notifications"
 import { registerProspectRoutes } from "@/server/modules/prospects"
 import { registerPushRoutes } from "@/server/modules/push"
+import { registerWorkoutRoutes } from "@/server/modules/workouts"
 
 function createApiRouter(): Router {
   const router = new Router()
@@ -16,6 +17,7 @@ function createApiRouter(): Router {
   registerNotificationRoutes(router)
   registerExerciseRoutes(router)
   registerProspectRoutes(router)
+  registerWorkoutRoutes(router)
   return router
 }
 

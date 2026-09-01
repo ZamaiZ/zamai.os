@@ -4,7 +4,7 @@ import { isProspectSegmentType } from "@/lib/prospects/segments"
 
 export const searchProspectsSchema = z.object({
   cityQuery: z.string().trim().min(2).max(120),
-  includedType: z
+  segmentId: z
     .string()
     .refine(isProspectSegmentType, { message: "Invalid segment" }),
 })

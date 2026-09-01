@@ -1,0 +1,1 @@
+export { WorkoutSessionSummary } from "./workoutSessionSummary"

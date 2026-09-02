@@ -7,16 +7,27 @@ import type {
   CatalogExercise,
   CatalogMuscleGroup,
 } from "@/components/exercises/shared/types"
-import { PlusIcon } from "@/components/icons"
-import { buttonVariants } from "@/components/primitives/button"
+import { HistoryIcon, PlusIcon } from "@/components/icons"
+import { Button, buttonVariants } from "@/components/primitives/button"
+import { WorkoutHistoryDialog } from "@/components/workouts/WorkoutHistoryDialog"
+import { WorkoutLiveDialog } from "@/components/workouts/WorkoutLiveDialog"
 import { WorkoutPlanDialog } from "@/components/workouts/WorkoutPlanDialog"
+import { WorkoutSessionDetailDialog } from "@/components/workouts/WorkoutSessionDetailDialog"
 import { WorkoutsCatalog } from "@/components/workouts/WorkoutsCatalog"
-import { workoutsCatalogCopy } from "@/components/workouts/shared/constants"
 import {
-  parseWorkoutDialog,
-  replaceWorkoutDialog,
-  type WorkoutDialogState,
-} from "@/components/workouts/shared/dialogParams"
+  workoutHistoryCopy,
+  workoutsCatalogCopy,
+} from "@/components/workouts/shared/constants"
+import {
+  closeSessionKeepHistory,
+  emptyWorkoutUrlState,
+  parseWorkoutUrlState,
+  replaceWorkoutUrlState,
+  withCompletedSession,
+  withHistory,
+  withHistorySession,
+  withLive,
+} from "@/components/workouts/shared/workoutUrlState"
 import type { PlanWorkout } from "@/components/workouts/shared/types"
 import { cn } from "@/lib/utils"
 
@@ -34,19 +45,28 @@ export function WorkoutsWorkspace({
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const dialog = parseWorkoutDialog(searchParams)
+  const url = parseWorkoutUrlState(searchParams)
 
-  const setDialog = React.useCallback(
-    (next: WorkoutDialogState) => {
-      replaceWorkoutDialog(router, pathname, searchParams, next)
+  const setUrl = React.useCallback(
+    (next: ReturnType<typeof parseWorkoutUrlState>) => {
+      replaceWorkoutUrlState(router, pathname, next)
     },
-    [pathname, router, searchParams]
+    [pathname, router]
+  )
+
+  const handleComplete = React.useCallback(
+    (sessionId: string) => {
+      setUrl(withCompletedSession(emptyWorkoutUrlState(), sessionId))
+    },
+    [setUrl]
   )
 
   function handleSuccess() {
-    setDialog({ kind: "closed" })
+    setUrl(emptyWorkoutUrlState())
     router.refresh()
   }
+
+  const showPlan = url.plan.kind !== "closed" && !url.liveSessionId
 
   return (
     <>
@@ -59,33 +79,89 @@ export function WorkoutsWorkspace({
             {workoutsCatalogCopy.title}
           </h1>
         </div>
-        <button
-          type="button"
-          className={cn(buttonVariants({ size: "sm" }))}
-          onClick={() => setDialog({ kind: "create" })}
-        >
-          <PlusIcon data-icon="inline-start" aria-hidden />
-          {workoutsCatalogCopy.newWorkout}
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setUrl(withHistory({ kind: "all" }))}
+          >
+            <HistoryIcon data-icon="inline-start" aria-hidden />
+            {workoutHistoryCopy.title}
+          </Button>
+          <button
+            type="button"
+            className={cn(buttonVariants({ size: "sm" }))}
+            onClick={() =>
+              setUrl({ ...emptyWorkoutUrlState(), plan: { kind: "create" } })
+            }
+          >
+            <PlusIcon data-icon="inline-start" aria-hidden />
+            {workoutsCatalogCopy.newWorkout}
+          </button>
+        </div>
       </section>
 
       <div className="mt-6">
         <WorkoutsCatalog
           workouts={workouts}
-          onCreate={() => setDialog({ kind: "create" })}
-          onView={(id) => setDialog({ kind: "view", id })}
-          onEdit={(id) => setDialog({ kind: "edit", id })}
+          onCreate={() =>
+            setUrl({ ...emptyWorkoutUrlState(), plan: { kind: "create" } })
+          }
+          onView={(id) =>
+            setUrl({ ...emptyWorkoutUrlState(), plan: { kind: "view", id } })
+          }
+          onEdit={(id) =>
+            setUrl({ ...emptyWorkoutUrlState(), plan: { kind: "edit", id } })
+          }
+          onHistory={(id) =>
+            setUrl(withHistory({ kind: "workout", workoutId: id }))
+          }
+          onResume={(sessionId) => setUrl(withLive(emptyWorkoutUrlState(), sessionId))}
         />
       </div>
 
-      <WorkoutPlanDialog
-        dialog={dialog}
+      {showPlan ? (
+        <WorkoutPlanDialog
+          dialog={url.plan}
+          workouts={workouts}
+          catalogExercises={catalogExercises}
+          muscleGroups={muscleGroups}
+          onClose={() => setUrl(emptyWorkoutUrlState())}
+          onEdit={(id) =>
+            setUrl({ ...emptyWorkoutUrlState(), plan: { kind: "edit", id } })
+          }
+          onSuccess={handleSuccess}
+        />
+      ) : null}
+
+      <WorkoutLiveDialog
+        sessionId={url.liveSessionId}
+        onClose={() => {
+          setUrl(emptyWorkoutUrlState())
+          router.refresh()
+        }}
+        onComplete={handleComplete}
+      />
+
+      <WorkoutHistoryDialog
+        filter={url.detailSessionId ? null : url.history}
         workouts={workouts}
-        catalogExercises={catalogExercises}
-        muscleGroups={muscleGroups}
-        onClose={() => setDialog({ kind: "closed" })}
-        onEdit={(id) => setDialog({ kind: "edit", id })}
-        onSuccess={handleSuccess}
+        onClose={() => setUrl(emptyWorkoutUrlState())}
+        onOpenSession={(sessionId) =>
+          setUrl(withHistorySession(url, sessionId))
+        }
+      />
+
+      <WorkoutSessionDetailDialog
+        sessionId={url.liveSessionId ? null : url.detailSessionId}
+        onClose={() => {
+          if (url.history) {
+            setUrl(closeSessionKeepHistory(url))
+            return
+          }
+          setUrl(emptyWorkoutUrlState())
+        }}
       />
     </>
   )

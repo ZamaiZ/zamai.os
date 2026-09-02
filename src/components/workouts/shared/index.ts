@@ -1,9 +1,12 @@
-export { workoutsCatalogCopy } from "./constants"
+export { workoutsCatalogCopy, workoutHistoryCopy } from "./constants"
 export {
   parseWorkoutDialog,
+  parseWorkoutUrlState,
   replaceWorkoutDialog,
+  replaceWorkoutUrlState,
   type WorkoutDialogState,
-} from "./dialogParams"
+  type WorkoutUrlState,
+} from "./workoutUrlState"
 export type {
   EditorDraftExercise,
   PlanCatalogExercise,

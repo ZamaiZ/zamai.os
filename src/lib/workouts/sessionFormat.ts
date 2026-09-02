@@ -36,3 +36,28 @@ export function formatSessionDate(iso: string): string {
 export function formatPrevious(weightKg: number, reps: number): string {
   return `${formatKg(weightKg, 1)} × ${reps}`
 }
+
+export function formatSignedKg(value: number, digits = 0): string {
+  const formatted = formatKg(Math.abs(value), digits)
+  if (value > 0) return `+${formatted} kg`
+  if (value < 0) return `−${formatted} kg`
+  return `${formatted} kg`
+}
+
+export function formatSignedPercent(value: number): string {
+  const formatted = new Intl.NumberFormat("pt-BR", {
+    maximumFractionDigits: 1,
+    minimumFractionDigits: 0,
+  }).format(Math.abs(value))
+  if (value > 0) return `+${formatted}%`
+  if (value < 0) return `−${formatted}%`
+  return `${formatted}%`
+}
+
+export function formatCompactSessionDate(iso: string): string {
+  return new Intl.DateTimeFormat("pt-BR", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).format(new Date(iso))
+}

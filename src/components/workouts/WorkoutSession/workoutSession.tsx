@@ -11,7 +11,6 @@ import {
   skipWorkoutSessionExerciseAction,
 } from "@/app/actions/workoutSessions"
 import { WorkoutSessionExerciseCard } from "@/components/workouts/WorkoutSessionExerciseCard"
-import { WorkoutSessionSummary } from "@/components/workouts/WorkoutSessionSummary"
 import { workoutSessionCopy } from "@/components/workouts/shared/constants"
 import { MoreHorizontalIcon, TrashIcon } from "@/components/icons"
 import {
@@ -140,9 +139,15 @@ function nextSetLabel(session: WorkoutSessionDto, from: WorkoutSessionSetDto) {
 
 type WorkoutSessionProps = {
   session: WorkoutSessionDto
+  onComplete: (sessionId: string) => void
+  onDiscarded: () => void
 }
 
-export function WorkoutSession({ session: initialSession }: WorkoutSessionProps) {
+export function WorkoutSession({
+  session: initialSession,
+  onComplete,
+  onDiscarded,
+}: WorkoutSessionProps) {
   const router = useRouter()
   const reduceMotion = useReducedMotion()
   const [session, setSession] = React.useState(initialSession)
@@ -338,7 +343,7 @@ export function WorkoutSession({ session: initialSession }: WorkoutSessionProps)
     }
     setFinishOpen(false)
     clearRest()
-    setSession(result.session)
+    onComplete(result.session.id)
     router.refresh()
   }
 
@@ -351,12 +356,8 @@ export function WorkoutSession({ session: initialSession }: WorkoutSessionProps)
       return
     }
     clearRest()
-    router.push("/lifestyle/workouts/plans")
+    onDiscarded()
     router.refresh()
-  }
-
-  if (session.status === "completed") {
-    return <WorkoutSessionSummary session={session} />
   }
 
   const completedSets = session.sets.filter((set) => set.status === "completed").length

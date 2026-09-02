@@ -4,29 +4,14 @@ import * as React from "react"
 import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
 
-import { PlayIcon, WeightIcon, XIcon } from "@/components/icons"
+import { PlayIcon, WeightIcon } from "@/components/icons"
 import { Button } from "@/components/primitives/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/primitives/dialog"
-import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/primitives/drawer"
 import { Spinner } from "@/components/primitives/spinner"
 import type {
   CatalogExercise,
   CatalogMuscleGroup,
 } from "@/components/exercises/shared/types"
+import { WorkoutDialogShell } from "@/components/workouts/WorkoutDialogShell"
 import { WorkoutEditorSkeleton } from "@/components/workouts/WorkoutEditorSkeleton"
 import { workoutsCatalogCopy, workoutSessionCopy } from "@/components/workouts/shared/constants"
 import { startOrResumeWorkoutSession } from "@/components/workouts/shared/startSession"
@@ -36,7 +21,6 @@ import type {
   WorkoutEditorHandle,
   WorkoutEditorReadyState,
 } from "@/components/workouts/WorkoutEditor"
-import { cn } from "@/lib/utils"
 
 const WorkoutEditorLazy = dynamic(
   () => import("@/components/workouts/WorkoutEditor/workoutEditor"),
@@ -47,22 +31,6 @@ const WorkoutViewLazy = dynamic(
   () => import("@/components/workouts/WorkoutView/workoutView"),
   { ssr: false, loading: () => <WorkoutEditorSkeleton /> }
 )
-
-const MOBILE_MEDIA_QUERY = "(max-width: 767px)"
-
-function subscribeMobileChange(onStoreChange: () => void) {
-  const mediaQuery = window.matchMedia(MOBILE_MEDIA_QUERY)
-  mediaQuery.addEventListener("change", onStoreChange)
-  return () => mediaQuery.removeEventListener("change", onStoreChange)
-}
-
-function getMobileSnapshot() {
-  return window.matchMedia(MOBILE_MEDIA_QUERY).matches
-}
-
-function getServerMobileSnapshot() {
-  return false
-}
 
 type WorkoutPlanDialogProps = {
   dialog: WorkoutDialogState
@@ -109,11 +77,6 @@ export function WorkoutPlanDialog({
   onSuccess,
 }: WorkoutPlanDialogProps) {
   const router = useRouter()
-  const isMobile = React.useSyncExternalStore(
-    subscribeMobileChange,
-    getMobileSnapshot,
-    getServerMobileSnapshot
-  )
   const editorRef = React.useRef<WorkoutEditorHandle>(null)
   const [editorState, setEditorState] =
     React.useState<WorkoutEditorReadyState>({
@@ -151,40 +114,6 @@ export function WorkoutPlanDialog({
     if (!nextOpen) onClose()
   }
 
-  const header = (
-    <div className="flex items-start gap-3">
-      <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary/12 text-primary">
-        <WeightIcon className="size-5" aria-hidden />
-      </span>
-      <div className="flex min-w-0 flex-1 flex-col gap-1 pe-8 text-start">
-        {isMobile ? (
-          <>
-            <DrawerTitle>{copy.title}</DrawerTitle>
-            <DrawerDescription>{copy.description}</DrawerDescription>
-          </>
-        ) : (
-          <>
-            <DialogTitle>{copy.title}</DialogTitle>
-            <DialogDescription>{copy.description}</DialogDescription>
-          </>
-        )}
-      </div>
-      {isMobile ? (
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-sm"
-          className="absolute top-4 end-4"
-          onClick={() => handleOpenChange(false)}
-          disabled={pending}
-          aria-label={workoutsCatalogCopy.closeDialog}
-        >
-          <XIcon />
-        </Button>
-      ) : null}
-    </div>
-  )
-
   const body = missing ? null : dialog.kind === "view" && workout ? (
     <WorkoutViewLazy workout={workout} />
   ) : dialog.kind === "create" || (dialog.kind === "edit" && workout) ? (
@@ -202,7 +131,7 @@ export function WorkoutPlanDialog({
   async function handleStart(workout: PlanWorkout) {
     setStarting(true)
     try {
-      await startOrResumeWorkoutSession(workout, (href) => router.push(href))
+      await startOrResumeWorkoutSession(workout, (href) => router.replace(href))
     } finally {
       setStarting(false)
     }
@@ -267,46 +196,21 @@ export function WorkoutPlanDialog({
       </>
     )
 
-  if (isMobile) {
-    return (
-      <Drawer open={open} onOpenChange={handleOpenChange} showSwipeHandle>
-        <DrawerContent className="[--drawer-content-max-height:calc(100dvh-0.75rem)]">
-          <DrawerHeader className="relative gap-0 pb-3 text-start">
-            {header}
-          </DrawerHeader>
-          <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4">{body}</div>
-          {editorState.error && !missing ? (
-            <p className="px-4 pb-2 text-sm text-destructive">
-              {editorState.error}
-            </p>
-          ) : null}
-          <DrawerFooter className="flex-row flex-wrap gap-2 border-t border-border/60 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3">
-            {footer}
-          </DrawerFooter>
-        </DrawerContent>
-      </Drawer>
-    )
-  }
-
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent
-        showCloseButton={!pending}
-        className={cn(
-          "flex max-h-[85vh] w-full flex-col gap-0 overflow-hidden p-0 sm:max-w-[min(57.5rem,calc(100vw-2rem))]"
-        )}
-      >
-        <DialogHeader className="shrink-0 gap-0 px-6 pt-6 pb-4">
-          {header}
-        </DialogHeader>
-        <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-2">{body}</div>
-        {editorState.error && !missing ? (
-          <p className="px-6 pb-2 text-sm text-destructive">{editorState.error}</p>
-        ) : null}
-        <DialogFooter className="shrink-0 flex-row flex-wrap justify-end gap-2 border-t border-border/60 px-6 py-4">
-          {footer}
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <WorkoutDialogShell
+      open={open}
+      onOpenChange={handleOpenChange}
+      title={copy.title}
+      description={copy.description}
+      icon={<WeightIcon className="size-5" aria-hidden />}
+      size="wide"
+      dismissible={!pending}
+      footer={footer}
+    >
+      {body}
+      {editorState.error && !missing ? (
+        <p className="pt-2 text-sm text-destructive">{editorState.error}</p>
+      ) : null}
+    </WorkoutDialogShell>
   )
 }

@@ -19,13 +19,20 @@ import {
   completeWorkoutSessionHandler,
   createWorkoutSessionHandler,
   discardWorkoutSessionHandler,
+  getWorkoutSessionDetailHandler,
   getWorkoutSessionHandler,
+  listWorkoutSessionHistoryHandler,
   patchWorkoutSessionSetHandler,
   skipWorkoutSessionExerciseHandler,
 } from "./workoutSessions.handlers"
 
 export function registerWorkoutRoutes(router: Router): void {
   router.get("/workouts", authenticate(), listWorkoutsHandler)
+  router.get(
+    "/workouts/sessions/history",
+    authenticate(),
+    listWorkoutSessionHistoryHandler
+  )
   router.get("/workouts/:id", authenticate(), getWorkoutHandler)
   router.post(
     "/workouts",
@@ -49,6 +56,11 @@ export function registerWorkoutRoutes(router: Router): void {
     "/workout-sessions/:id",
     authenticate(),
     getWorkoutSessionHandler
+  )
+  router.get(
+    "/workout-sessions/:id/detail",
+    authenticate(),
+    getWorkoutSessionDetailHandler
   )
   router.patch(
     "/workout-sessions/:id/sets",

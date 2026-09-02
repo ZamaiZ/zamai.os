@@ -35,6 +35,8 @@ type WorkoutsCatalogProps = {
   onCreate: () => void
   onView: (id: string) => void
   onEdit: (id: string) => void
+  onHistory: (id: string) => void
+  onResume: (sessionId: string) => void
 }
 
 export function WorkoutsCatalog({
@@ -42,6 +44,8 @@ export function WorkoutsCatalog({
   onCreate,
   onView,
   onEdit,
+  onHistory,
+  onResume,
 }: WorkoutsCatalogProps) {
   const router = useRouter()
   const [query, setQuery] = React.useState("")
@@ -88,11 +92,7 @@ export function WorkoutsCatalog({
           <Button
             type="button"
             size="sm"
-            onClick={() =>
-              router.push(
-                `/lifestyle/workouts/sessions/${activeWorkout.activeSessionId}`
-              )
-            }
+            onClick={() => onResume(activeWorkout.activeSessionId)}
           >
             <PlayIcon data-icon="inline-start" aria-hidden />
             {workoutSessionCopy.resumeBannerCta}
@@ -144,6 +144,7 @@ export function WorkoutsCatalog({
               workout={workout}
               onView={() => onView(workout.id)}
               onEdit={() => onEdit(workout.id)}
+              onHistory={() => onHistory(workout.id)}
               onDelete={setPendingDelete}
             />
           ))}

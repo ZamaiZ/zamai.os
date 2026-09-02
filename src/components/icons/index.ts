@@ -26,6 +26,7 @@ export {
   BsGlobe as GlobeIcon,
   BsGoogle as GoogleIcon,
   BsGrid3X3Gap as GridIcon,
+  BsClockHistory as HistoryIcon,
   BsHeartPulse as HeartPulseIcon,
   BsHouseDoor as HomeIcon,
   BsInfoCircle as InfoIcon,

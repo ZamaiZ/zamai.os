@@ -46,6 +46,15 @@ export const completeWorkoutSessionSchema = z.object({
   avgHeartRate: z.number().int().positive().optional(),
 })
 
+export const listSessionHistoryQuerySchema = z.object({
+  workoutId: z.string().uuid().optional(),
+  limit: z.coerce.number().int().min(1).max(50).optional().default(20),
+  cursorFinishedAt: z.string().min(1).optional(),
+  cursorId: z.string().uuid().optional(),
+})
+
+export type ListSessionHistoryQuery = z.infer<typeof listSessionHistoryQuerySchema>
+
 export type PatchWorkoutSessionSetInput = z.infer<
   typeof patchWorkoutSessionSetSchema
 >

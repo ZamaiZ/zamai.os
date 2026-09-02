@@ -1,0 +1,1 @@
+export { WorkoutSessionDetailDialog } from "./workoutSessionDetailDialog"

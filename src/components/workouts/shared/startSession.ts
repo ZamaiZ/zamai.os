@@ -1,5 +1,6 @@
 import { startWorkoutSessionAction } from "@/app/actions/workoutSessions"
 import { toast } from "@/components/primitives/toast"
+import { liveHref } from "@/components/workouts/shared/workoutUrlState"
 import type { PlanWorkout } from "@/components/workouts/shared/types"
 
 export async function startOrResumeWorkoutSession(
@@ -7,17 +8,17 @@ export async function startOrResumeWorkoutSession(
   navigate: (href: string) => void
 ): Promise<void> {
   if (workout.activeSessionId) {
-    navigate(`/lifestyle/workouts/sessions/${workout.activeSessionId}`)
+    navigate(liveHref(workout.activeSessionId))
     return
   }
 
   const result = await startWorkoutSessionAction(workout.id)
   if (result.ok) {
-    navigate(`/lifestyle/workouts/sessions/${result.session.id}`)
+    navigate(liveHref(result.session.id))
     return
   }
   if (result.inProgressSessionId) {
-    navigate(`/lifestyle/workouts/sessions/${result.inProgressSessionId}`)
+    navigate(liveHref(result.inProgressSessionId))
     return
   }
   toast.add({ type: "error", title: result.error })

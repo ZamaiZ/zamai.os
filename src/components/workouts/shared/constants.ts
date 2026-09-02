@@ -51,6 +51,22 @@ export const workoutsCatalogCopy = {
   pickerEmpty: "Nenhum exercício encontrado.",
   pickerAllGroups: "Todos",
   protocolLabel: "Protocolo de séries",
+  historyMenu: "Histórico deste treino",
+  historyGlobal: "Histórico",
+} as const
+
+export const workoutHistoryCopy = {
+  title: "Histórico",
+  titleFiltered: (name: string) => `Histórico · ${name}`,
+  description: "Execuções concluídas, volume e evolução contra o treino anterior.",
+  descriptionFiltered: "Comparação sempre contra a execução anterior deste treino.",
+  emptyTitle: "Nenhuma execução ainda",
+  emptyDescription: "Quando você encerrar um treino, ele aparece aqui com volume e referência.",
+  retry: "Tentar de novo",
+  loadError: "Não foi possível carregar o histórico.",
+  loadingMore: "Carregando…",
+  firstSession: "Primeira execução",
+  openSession: "Ver resumo",
 } as const
 
 export const workoutSessionCopy = {
@@ -107,4 +123,17 @@ export const workoutSessionCopy = {
   missingTitle: "Sessão não encontrada",
   missingDescription: "Esse treino não está mais disponível.",
   progress: (done: number, total: number) => `${done}/${total} séries`,
+  referenceProgress: (label: string) => `Rumo a ${label}`,
+  firstExecution: "Primeira execução deste treino",
+  vsPrevious: "vs anterior",
+  breakdownTitle: "Por exercício",
+  colCurrent: "Atual",
+  colDelta: "Δ",
+  trendNew: "Nova",
+  trendMissing: "—",
+  trendSkipped: "Pulado",
+  loadError: "Não foi possível carregar o resumo.",
+  retry: "Tentar de novo",
+  nextMilestone: (percent: number, label: string) =>
+    `${percent}% rumo a ${label}`,
 } as const

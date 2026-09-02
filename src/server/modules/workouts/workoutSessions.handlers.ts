@@ -3,6 +3,7 @@ import type { ApiHandler } from "@/server/http/types"
 import { workoutIdParamSchema } from "@/lib/validations/workouts"
 import {
   completeWorkoutSessionSchema,
+  listSessionHistoryQuerySchema,
   patchWorkoutSessionSetSchema,
   skipWorkoutSessionExerciseSchema,
   workoutSessionIdParamSchema,
@@ -135,4 +136,45 @@ export const discardWorkoutSessionHandler: ApiHandler = async (ctx) => {
   } catch (error) {
     return mapSessionError(error)
   }
+}
+
+export const getWorkoutSessionDetailHandler: ApiHandler = async (ctx) => {
+  const parsed = workoutSessionIdParamSchema.safeParse({ id: ctx.params.id })
+  if (!parsed.success) {
+    return json({ error: "Invalid session id" }, { status: 400 })
+  }
+
+  const session = await WorkoutSessionService.getSessionDetail(parsed.data.id)
+  if (!session) {
+    return json({ error: "Not found" }, { status: 404 })
+  }
+  return json({ session })
+}
+
+export const listWorkoutSessionHistoryHandler: ApiHandler = async (ctx) => {
+  const url = new URL(ctx.request.url)
+  const parsed = listSessionHistoryQuerySchema.safeParse({
+    workoutId: url.searchParams.get("workoutId") ?? undefined,
+    limit: url.searchParams.get("limit") ?? undefined,
+    cursorFinishedAt: url.searchParams.get("cursorFinishedAt") ?? undefined,
+    cursorId: url.searchParams.get("cursorId") ?? undefined,
+  })
+  if (!parsed.success) {
+    return json({ error: "Invalid query" }, { status: 400 })
+  }
+
+  const { workoutId, limit, cursorFinishedAt, cursorId } = parsed.data
+  if ((cursorFinishedAt && !cursorId) || (!cursorFinishedAt && cursorId)) {
+    return json({ error: "Invalid cursor" }, { status: 400 })
+  }
+
+  const result = await WorkoutSessionService.listSessionHistory({
+    workoutId,
+    limit,
+    cursor:
+      cursorFinishedAt && cursorId
+        ? { finishedAt: cursorFinishedAt, id: cursorId }
+        : undefined,
+  })
+  return json(result)
 }

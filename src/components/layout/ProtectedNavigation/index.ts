@@ -1,7 +1,14 @@
 export {
   getNavigationLeaves,
   getProtectedSectionLabel,
+  isGroupActive,
+  isLinkActive,
   isProtectedRouteActive,
   protectedNavigation,
 } from "./protectedNavigation"
-export type { ProtectedNavigationItem } from "./types"
+export type {
+  ProtectedNavigationEntry,
+  ProtectedNavigationGroup,
+  ProtectedNavigationItem,
+  ProtectedNavigationLink,
+} from "./types"

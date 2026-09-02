@@ -7,6 +7,7 @@ import { motion, useReducedMotion } from "motion/react"
 import { MuscleGroupIcon } from "@/components/exercises/MuscleGroupIcon"
 import { NeonGlowCard } from "@/components/exercises/NeonGlowCard"
 import {
+  HistoryIcon,
   MoreHorizontalIcon,
   PencilIcon,
   PlayIcon,
@@ -34,6 +35,7 @@ type WorkoutCardProps = {
   onView: (workout: PlanWorkout) => void
   onEdit: (workout: PlanWorkout) => void
   onDelete: (workout: PlanWorkout) => void
+  onHistory: (workout: PlanWorkout) => void
 }
 
 export function WorkoutCard({
@@ -41,6 +43,7 @@ export function WorkoutCard({
   onView,
   onEdit,
   onDelete,
+  onHistory,
 }: WorkoutCardProps) {
   const router = useRouter()
   const reduceMotion = useReducedMotion()
@@ -52,7 +55,7 @@ export function WorkoutCard({
   async function handleStart() {
     setStarting(true)
     try {
-      await startOrResumeWorkoutSession(workout, (href) => router.push(href))
+      await startOrResumeWorkoutSession(workout, (href) => router.replace(href))
     } finally {
       setStarting(false)
     }
@@ -96,6 +99,10 @@ export function WorkoutCard({
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-44">
                 <DropdownMenuGroup>
+                  <DropdownMenuItem onClick={() => onHistory(workout)}>
+                    <HistoryIcon aria-hidden />
+                    {workoutsCatalogCopy.historyMenu}
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => onEdit(workout)}>
                     <PencilIcon aria-hidden />
                     {workoutsCatalogCopy.editMenu}

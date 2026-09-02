@@ -3,14 +3,20 @@
 import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { HomeIcon, LogOutIcon, MenuIcon } from "@/components/icons"
+import { ChevronRightIcon, HomeIcon, LogOutIcon, MenuIcon } from "@/components/icons"
 import { useTheme } from "next-themes"
 import { useFormStatus } from "react-dom"
 
 import { logout } from "@/app/actions/logout"
 import {
-  getNavigationLeaves,
-  isProtectedRouteActive,
+  isGroupActive,
+  isLinkActive,
+  protectedNavigation,
+} from "@/components/layout/ProtectedNavigation"
+import type {
+  ProtectedNavigationEntry,
+  ProtectedNavigationGroup,
+  ProtectedNavigationLink,
 } from "@/components/layout/ProtectedNavigation"
 import { getInitials } from "@/components/layout/shared/getInitials"
 import { themeMeta } from "@/components/layout/shared/themeMeta"
@@ -36,6 +42,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/primitives/dropdownMenu"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/primitives/collapsible"
 import { Spinner } from "@/components/primitives/spinner"
 import { isThemeValue, nextTheme, type ThemeValue } from "@/lib/theme"
 import { cn } from "@/lib/utils"
@@ -86,6 +97,138 @@ function MobileLogoutItem() {
       {pending ? <Spinner aria-hidden /> : <LogOutIcon aria-hidden />}
       {pending ? mobileNavigationCopy.loggingOut : mobileNavigationCopy.logout}
     </DropdownMenuItem>
+  )
+}
+
+function MobileNavLink({
+  item,
+  pathname,
+  onNavigate,
+}: {
+  item: ProtectedNavigationLink
+  pathname: string
+  onNavigate: () => void
+}) {
+  const isActive = isLinkActive(pathname, item)
+
+  return (
+    <Link
+      href={item.href}
+      aria-current={isActive ? "page" : undefined}
+      onClick={onNavigate}
+      className={cn(
+        "flex min-h-12 items-center gap-3 rounded-xl px-3 text-sm font-medium outline-none transition-[color,background-color,transform] duration-150 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none",
+        isActive
+          ? "bg-primary/10 text-primary"
+          : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+      )}
+    >
+      <span
+        className={cn(
+          "flex size-9 shrink-0 items-center justify-center rounded-lg border",
+          isActive
+            ? "border-primary/20 bg-primary/10"
+            : "border-border/70 bg-muted/45"
+        )}
+      >
+        <item.icon aria-hidden className="size-4.5" />
+      </span>
+      <span className="min-w-0 flex-1 truncate">{item.label}</span>
+      {isActive ? (
+        <span
+          aria-hidden
+          className="ms-auto size-1.5 shrink-0 rounded-full bg-primary"
+        />
+      ) : null}
+    </Link>
+  )
+}
+
+function MobileNavGroup({
+  group,
+  pathname,
+  onNavigate,
+}: {
+  group: ProtectedNavigationGroup
+  pathname: string
+  onNavigate: () => void
+}) {
+  const groupActive = isGroupActive(pathname, group)
+  const [open, setOpen] = React.useState(groupActive)
+
+  React.useEffect(() => {
+    if (groupActive) setOpen(true)
+  }, [groupActive])
+
+  return (
+    <Collapsible open={open} onOpenChange={setOpen}>
+      <div>
+        <CollapsibleTrigger
+          className={cn(
+            "flex min-h-12 w-full items-center gap-3 rounded-xl px-3 text-sm font-medium outline-none transition-[color,background-color,transform] duration-150 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none",
+            groupActive
+              ? "text-foreground"
+              : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+          )}
+          aria-expanded={open}
+        >
+          <span
+            className={cn(
+              "flex size-9 shrink-0 items-center justify-center rounded-lg border",
+              groupActive
+                ? "border-primary/20 bg-primary/10 text-primary"
+                : "border-border/70 bg-muted/45"
+            )}
+          >
+            <group.icon aria-hidden className="size-4.5" />
+          </span>
+          <span className="min-w-0 flex-1 truncate text-start">{group.label}</span>
+          <ChevronRightIcon
+            aria-hidden
+            className={cn(
+              "size-3.5 shrink-0 text-muted-foreground transition-transform duration-150 ease-out motion-reduce:transition-none",
+              open && "rotate-90"
+            )}
+          />
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <div className="ms-6 mt-1 space-y-1 border-s border-border/70 ps-2">
+            {group.children.map((child) => (
+              <MobileNavLink
+                key={child.href}
+                item={child}
+                pathname={pathname}
+                onNavigate={onNavigate}
+              />
+            ))}
+          </div>
+        </CollapsibleContent>
+      </div>
+    </Collapsible>
+  )
+}
+
+function MobileNavEntry({
+  entry,
+  pathname,
+  onNavigate,
+}: {
+  entry: ProtectedNavigationEntry
+  pathname: string
+  onNavigate: () => void
+}) {
+  if (entry.type === "group") {
+    return (
+      <MobileNavGroup
+        group={entry}
+        pathname={pathname}
+        onNavigate={onNavigate}
+      />
+    )
+  }
+
+  return (
+    <MobileNavLink item={entry} pathname={pathname} onNavigate={onNavigate} />
   )
 }
 
@@ -197,49 +340,14 @@ export function MobileNavigation({ userName }: MobileNavigationProps) {
               </DrawerHeader>
               <div className="min-h-0 overflow-y-auto px-3 pb-[calc(1rem+env(safe-area-inset-bottom))]">
                 <div className="space-y-1">
-                  {getNavigationLeaves().map((item) => {
-                    const isActive = isProtectedRouteActive(pathname, item.href)
-
-                    return (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        aria-current={isActive ? "page" : undefined}
-                        onClick={() => setDrawerOpen(false)}
-                        className={cn(
-                          "flex min-h-12 items-center gap-3 rounded-xl px-3 text-sm font-medium outline-none transition-[color,background-color,transform] duration-150 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none",
-                          isActive
-                            ? "bg-primary/10 text-primary"
-                            : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                        )}
-                      >
-                        <span
-                          className={cn(
-                            "flex size-9 shrink-0 items-center justify-center rounded-lg border",
-                            isActive
-                              ? "border-primary/20 bg-primary/10"
-                              : "border-border/70 bg-muted/45"
-                          )}
-                        >
-                          <item.icon aria-hidden className="size-4.5" />
-                        </span>
-                        <span className="min-w-0 flex-1">
-                          <span className="block truncate">{item.label}</span>
-                          {item.subtitle ? (
-                            <span className="mt-0.5 block truncate text-[0.68rem] font-normal tracking-wide text-muted-foreground">
-                              {item.subtitle}
-                            </span>
-                          ) : null}
-                        </span>
-                        {isActive ? (
-                          <span
-                            aria-hidden
-                            className="ms-auto size-1.5 shrink-0 rounded-full bg-primary"
-                          />
-                        ) : null}
-                      </Link>
-                    )
-                  })}
+                  {protectedNavigation.map((entry) => (
+                    <MobileNavEntry
+                      key={entry.type === "group" ? entry.id : entry.href}
+                      entry={entry}
+                      pathname={pathname}
+                      onNavigate={() => setDrawerOpen(false)}
+                    />
+                  ))}
                 </div>
               </div>
             </DrawerContent>

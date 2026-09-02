@@ -4,11 +4,16 @@ import { requireAuthenticatedUser } from "@/lib/auth/session"
 import { workoutIdParamSchema } from "@/lib/validations/workouts"
 import {
   completeWorkoutSessionSchema,
+  listSessionHistoryQuerySchema,
   patchWorkoutSessionSetSchema,
   skipWorkoutSessionExerciseSchema,
   workoutSessionIdParamSchema,
 } from "@/lib/validations/workoutSessions"
-import type { WorkoutSessionDto } from "@/lib/workouts/session.types"
+import type {
+  WorkoutSessionDetailDto,
+  WorkoutSessionDto,
+  WorkoutSessionHistoryPage,
+} from "@/lib/workouts/session.types"
 import {
   SessionInProgressError,
   WorkoutSessionService,
@@ -168,5 +173,85 @@ export async function discardWorkoutSessionAction(
   } catch (error) {
     const mapped = mapSessionError(error, "Não foi possível descartar o treino.")
     return { ok: false, error: mapped.error }
+  }
+}
+
+export async function getWorkoutSessionAction(
+  sessionId: string
+): Promise<SessionMutationResult> {
+  await requireAuthenticatedUser()
+  const parsedId = workoutSessionIdParamSchema.safeParse({ id: sessionId })
+  if (!parsedId.success) {
+    return { ok: false, error: "Sessão não encontrada." }
+  }
+
+  try {
+    const session = await WorkoutSessionService.getSessionById(parsedId.data.id)
+    if (!session) {
+      return { ok: false, error: "Sessão não encontrada." }
+    }
+    return { ok: true, session }
+  } catch (error) {
+    return mapSessionError(error, "Não foi possível carregar a sessão.")
+  }
+}
+
+export async function getWorkoutSessionDetailAction(
+  sessionId: string
+): Promise<
+  | { ok: true; session: WorkoutSessionDetailDto }
+  | { ok: false; error: string }
+> {
+  await requireAuthenticatedUser()
+  const parsedId = workoutSessionIdParamSchema.safeParse({ id: sessionId })
+  if (!parsedId.success) {
+    return { ok: false, error: "Sessão não encontrada." }
+  }
+
+  try {
+    const session = await WorkoutSessionService.getSessionDetail(parsedId.data.id)
+    if (!session) {
+      return { ok: false, error: "Sessão não encontrada." }
+    }
+    return { ok: true, session }
+  } catch {
+    return { ok: false, error: "Não foi possível carregar o resumo." }
+  }
+}
+
+export async function listWorkoutSessionHistoryAction(input: {
+  workoutId?: string
+  cursor?: { finishedAt: string; id: string }
+  limit?: number
+}): Promise<
+  | { ok: true; page: WorkoutSessionHistoryPage }
+  | { ok: false; error: string }
+> {
+  await requireAuthenticatedUser()
+  const parsed = listSessionHistoryQuerySchema.safeParse({
+    workoutId: input.workoutId,
+    limit: input.limit,
+    cursorFinishedAt: input.cursor?.finishedAt,
+    cursorId: input.cursor?.id,
+  })
+  if (!parsed.success) {
+    return { ok: false, error: "Filtro de histórico inválido." }
+  }
+
+  try {
+    const page = await WorkoutSessionService.listSessionHistory({
+      workoutId: parsed.data.workoutId,
+      limit: parsed.data.limit,
+      cursor:
+        parsed.data.cursorFinishedAt && parsed.data.cursorId
+          ? {
+              finishedAt: parsed.data.cursorFinishedAt,
+              id: parsed.data.cursorId,
+            }
+          : undefined,
+    })
+    return { ok: true, page }
+  } catch {
+    return { ok: false, error: "Não foi possível carregar o histórico." }
   }
 }
